@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Population Ecology: Survivorship Analysis from Cemetery Data</title>
+    <meta name="description" content="An interactive web-based academic presentation on Biology Population Ecology and life table survivorship analysis using cemetery data.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=Lora:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- SheetJS Excel Parser CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body class="slide-mode theme-dark">
+    <!-- Top Progress Bar -->
+    <div class="progress-bar-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <!-- Main Navigation Bar -->
+    <header class="navbar">
+        <div class="navbar-logo">
+            <i class="fa-solid fa-dna logo-icon"></i>
+            <span class="logo-text">Eco<span class="accent-text">Metrics</span></span>
+        </div>
+        <div class="navbar-controls">
+            <!-- Mode Toggle -->
+            <div class="mode-toggle-group">
+                <button id="btnSlideMode" class="mode-btn active" title="Switch to Slideshow Mode">
+                    <i class="fa-solid fa-person-chalkboard"></i> <span>Slide Mode</span>
+                </button>
+                <button id="btnDocMode" class="mode-btn" title="Switch to Full Document Mode">
+                    <i class="fa-solid fa-file-invoice"></i> <span>Document Mode</span>
+                </button>
+            </div>
+            
+            <!-- Quick Utility Links -->
+            <button id="themeToggleBtn" class="utility-btn" title="Toggle Light/Dark Theme">
+                <i class="fa-solid fa-moon"></i>
+            </button>
+            <button id="saveHtmlBtn" class="utility-btn" title="Save & Download HTML" style="margin-left: 8px;">
+                <i class="fa-solid fa-floppy-disk"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- App Shell Layout -->
+    <div class="app-container">
+        <!-- Sidebar Navigation (Only visible in Slide Mode) -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h3>Presentation Index</h3>
+                <span class="slide-counter"><span id="currentSlideNum">1</span> / 11</span>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="nav-item active" data-slide="0"><i class="fa-solid fa-heading"></i> Title Slide</li>
+                    <li class="nav-item" data-slide="1"><i class="fa-solid fa-bullseye"></i> Objectives</li>
+                    <li class="nav-item" data-slide="2"><i class="fa-solid fa-monument"></i> Cemetery Details</li>
+                    <li class="nav-item" data-slide="3"><i class="fa-solid fa-microscope"></i> Methodology</li>
+                    <li class="nav-item" data-slide="4"><i class="fa-solid fa-camera-retro"></i> Photo Documentation</li>
+                    <li class="nav-item" data-slide="5"><i class="fa-solid fa-mars"></i> Male Population Table</li>
+                    <li class="nav-item" data-slide="6"><i class="fa-solid fa-venus"></i> Female Population Table</li>
+                    <li class="nav-item" data-slide="7"><i class="fa-solid fa-chart-line"></i> Survivorship Curve</li>
+                    <li class="nav-item" data-slide="8"><i class="fa-solid fa-comments"></i> Analysis & Discussion</li>
+                    <li class="nav-item" data-slide="9"><i class="fa-solid fa-graduation-cap"></i> Conclusion</li>
+                    <li class="nav-item" data-slide="10"><i class="fa-solid fa-file-shield"></i> References & Proof</li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <p class="student-meta"><i class="fa-solid fa-user-graduate"></i> Computer Science Student</p>
+            </div>
+        </aside>
+
+        <!-- Presentation Slides / Document Content Area -->
+        <main class="content-viewport" id="contentViewport">
+            
+            <!-- SLIDE 1: TITLE SLIDE -->
+            <section class="slide-section active" id="slide0">
+                <div class="slide-inner title-slide-layout">
+                    <div class="title-badge">
+                        <i class="fa-solid fa-chart-area"></i> Ecology Demography Study
+                    </div>
+                    <h1 class="main-title" contenteditable="true" id="mainTitle">Population Ecology: Survivorship Analysis from Cemetery Data</h1>
+                    <p class="main-subtitle" contenteditable="true" id="mainSubtitle">A Life Table Study on Male and Female Populations</p>
+                    
+                    <div class="title-meta-grid">
+                        <div class="meta-card">
+                            <span class="meta-label">Investigator</span>
+                            <span class="meta-value" contenteditable="true" id="investigatorName">Ali Andrei</span>
+                            <span class="meta-sub" contenteditable="true" id="investigatorSub">B.S. Computer Science</span>
+                        </div>
+                        <div class="meta-card">
+                            <span class="meta-label">Course / Lab Group</span>
+                            <span class="meta-value" contenteditable="true" id="courseName">Biology 102: Population Ecology</span>
+                            <span class="meta-sub" contenteditable="true" id="sectionName">Section 4A — Lab Group Delta</span>
+                        </div>
+                        <div class="meta-card">
+                            <span class="meta-label">Date of Submission</span>
+                            <span class="meta-value" contenteditable="true" id="submissionDate">May 21, 2026</span>
+                            <span class="meta-sub" contenteditable="true" id="semesterName">Semester II, Academic Year 2025-2026</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 2: OBJECTIVES -->
+            <section class="slide-section" id="slide1">
+                <div class="slide-inner">
+                    <div class="slide-badge"><i class="fa-solid fa-bullseye"></i> Research Focus</div>
+                    <h2 class="section-title">Objectives & Key Goals</h2>
+                    <p class="section-desc">This laboratory investigation is designed to analyze human cohorts using demographic principles usually applied to natural wildlife populations.</p>
+                    
+                    <div class="objectives-grid">
+                        <div class="objective-card">
+                            <div class="obj-num">01</div>
+                            <div class="obj-content">
+                                <h3 contenteditable="true" id="obj1Title">Collect Historical Mortality Data</h3>
+                                <p contenteditable="true" id="obj1Desc">Gather a statistically significant sample size of 400 individuals (200 males, 200 females) from a local cemetery database, spanning both historical and modern eras.</p>
+                            </div>
+                        </div>
+                        <div class="objective-card">
+                            <div class="obj-num">02</div>
+                            <div class="obj-content">
+                                <h3 contenteditable="true" id="obj2Title">Construct Standard Life Tables</h3>
+                                <p contenteditable="true" id="obj2Desc">Build cohort life tables for both male and female populations, tracking age-specific intervals of 5 years from birth to extreme senescence.</p>
+                            </div>
+                        </div>
+                        <div class="objective-card">
+                            <div class="obj-num">03</div>
+                            <div class="obj-content">
+                                <h3 contenteditable="true" id="obj3Title">Compute Survivorship & Mortality</h3>
+                                <p contenteditable="true" id="obj3Desc">Apply demographic mathematical models to calculate survivorship (l<sub>x</sub>), mortality rate (q<sub>x</sub>), and age-specific life expectancy (e<sub>x</sub>) for each cohort.</p>
+                            </div>
+                        </div>
+                        <div class="objective-card">
+                            <div class="obj-num">04</div>
+                            <div class="obj-content">
+                                <h3 contenteditable="true" id="obj4Title">Generate Comparative Curves</h3>
+                                <p contenteditable="true" id="obj4Desc">Render and evaluate comparative survivorship curves to identify the ecological survivorship models (Type I, II, or III) exhibited by human cohorts.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 3: CEMETERY DETAILS -->
+            <section class="slide-section" id="slide2">
+                <div class="slide-inner large-layout">
+                    <div class="slide-badge"><i class="fa-solid fa-monument"></i> Field Sites</div>
+                    <h2 class="section-title">Demographic Investigation Sites</h2>
+                    <p class="section-desc">We collected mortality data across two different local cemeteries to analyze comparative demographics and verify cohort consistency. You can click to edit text or replace photos below.</p>
+                    
+                    <div class="two-cemetery-grid">
+                        <!-- Cemetery A Card -->
+                        <div class="cemetery-card-site">
+                            <div class="site-image-wrapper">
+                                <img src="assets/cemetery_entrance.png" alt="Cemetery A Entrance" class="field-photo" id="cemAPhoto">
+                                <label class="photo-upload-overlay">
+                                    <i class="fa-solid fa-camera"></i> Replace Photo
+                                    <input type="file" class="photo-upload-input" data-cemetery="cemeteryA" accept="image/*" style="display:none;">
+                                </label>
+                            </div>
+                            <div class="site-content">
+                                <div class="site-header-row">
+                                    <h3 contenteditable="true" id="cemAName" class="editable-title">Evergreen Memorial Park</h3>
+                                </div>
+                                <div class="site-meta-badges">
+                                    <span class="meta-pill"><i class="fa-solid fa-map-location-dot"></i> <span contenteditable="true" id="cemALocation">North Ridge Heights, BioCity (40.7891° N, 73.9626° W)</span></span>
+                                    <span class="meta-pill"><i class="fa-solid fa-calendar-day"></i> <span contenteditable="true" id="cemADate">May 15, 2026</span></span>
+                                </div>
+                                <p contenteditable="true" id="cemADesc" class="editable-desc">Established in 1864, Evergreen Memorial Park features over 15,000 interments across 45 rolling acres of woodland. The site serves as a vital historical archive of human demography, enabling an accurate longitudinal review of cohort survivorship over time.</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Cemetery B Card -->
+                        <div class="cemetery-card-site">
+                            <div class="site-image-wrapper">
+                                <img src="assets/cemetery_entrance_2.png" alt="Cemetery B Entrance" class="field-photo" id="cemBPhoto" onerror="this.src='https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=600&q=80'">
+                                <label class="photo-upload-overlay">
+                                    <i class="fa-solid fa-camera"></i> Replace Photo
+                                    <input type="file" class="photo-upload-input" data-cemetery="cemeteryB" accept="image/*" style="display:none;">
+                                </label>
+                            </div>
+                            <div class="site-content">
+                                <div class="site-header-row">
+                                    <h3 contenteditable="true" id="cemBName" class="editable-title">Oakridge Cemetery</h3>
+                                </div>
+                                <div class="site-meta-badges">
+                                    <span class="meta-pill"><i class="fa-solid fa-map-location-dot"></i> <span contenteditable="true" id="cemBLocation">East Valley District, BioCity (40.7421° N, 73.8912° W)</span></span>
+                                    <span class="meta-pill"><i class="fa-solid fa-calendar-day"></i> <span contenteditable="true" id="cemBDate">May 16, 2026</span></span>
+                                </div>
+                                <p contenteditable="true" id="cemBDesc" class="editable-desc">Founded in 1888, Oakridge Cemetery is a historic municipal graveyard spanning 30 acres. It contains a higher concentration of early-20th-century industrial worker cohorts, providing a distinct comparative dataset reflecting urban industrialization and its specific demographic impacts.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 4: METHODOLOGY -->
+            <section class="slide-section" id="slide3">
+                <div class="slide-inner">
+                    <div class="slide-badge"><i class="fa-solid fa-microscope"></i> Scientific Method</div>
+                    <h2 class="section-title">Methodology & Analytical Pipeline</h2>
+                    <p class="section-desc">To ensure empirical rigor and demographic accuracy, the study was executed using the following structured scientific workflow.</p>
+                                   <div class="methodology-flow">
+                        <!-- Step 1 -->
+                        <div class="method-step-card">
+                            <div class="step-header">
+                                <i class="fa-solid fa-users-rectangle"></i>
+                                <span class="step-num">01</span>
+                            </div>
+                            <h3 contenteditable="true" id="method1Title">Cohort Selection</h3>
+                            <p contenteditable="true" id="method1Desc">Exactly 400 individuals were randomly selected from headstones: 200 biological males and 200 biological females. To prevent cohort bias, samples were drawn uniformly across several cemetery sections.</p>
+                        </div>
+                        
+                        <!-- Step 2 -->
+                        <div class="method-step-card">
+                            <div class="step-header">
+                                <i class="fa-solid fa-calculator"></i>
+                                <span class="step-num">02</span>
+                            </div>
+                            <h3 contenteditable="true" id="method2Title">Age Calculation</h3>
+                            <p contenteditable="true" id="method2Desc">For each individual, gender, birth year, and death year were logged. The precise age at death was calculated as: <code>Age = Death Year - Birth Year</code>. Infant mortalities under 1 year were logged as Age 0.</p>
+                        </div>
+                        
+                        <!-- Step 3 -->
+                        <div class="method-step-card">
+                            <div class="step-header">
+                                <i class="fa-solid fa-cubes"></i>
+                                <span class="step-num">03</span>
+                            </div>
+                            <h3 contenteditable="true" id="method3Title">Age Grouping</h3>
+                            <p contenteditable="true" id="method3Desc">Individuals were categorized into 5-year class intervals: 0-4, 5-9, 10-14, ... through to 100+. The frequency of deaths within each interval formed the <code>d_x</code> parameter.</p>
+                        </div>
+ 
+                        <!-- Step 4 -->
+                        <div class="method-step-card">
+                            <div class="step-header">
+                                <i class="fa-solid fa-code"></i>
+                                <span class="step-num">04</span>
+                            </div>
+                            <h3 contenteditable="true" id="method4Title">Demographic Parsing</h3>
+                            <p contenteditable="true" id="method4Desc">Using raw <code>d_x</code> counts, an algorithmic parser calculated cohort metrics (<code>n_x</code>, <code>l_x</code>, <code>q_x</code>, <code>L_x</code>, <code>T_x</code>, and <code>e_x</code>) utilizing standard ecological life table equations.</p>
+                        </div>
+                    </div>
+
+                    <div class="academic-equation-panel">
+                        <h4><i class="fa-solid fa-square-root-variable"></i> Key Demography Calculations Applied</h4>
+                        <div class="equation-flex">
+                            <div class="eq-item">
+                                <span class="eq-name">Survivorship (l<sub>x</sub>)</span>
+                                <span class="eq-formula">l<sub>x</sub> = n<sub>x</sub> / n<sub>0</sub></span>
+                            </div>
+                            <div class="eq-item">
+                                <span class="eq-name">Mortality Rate (q<sub>x</sub>)</span>
+                                <span class="eq-formula">q<sub>x</sub> = d<sub>x</sub> / n<sub>x</sub></span>
+                            </div>
+                            <div class="eq-item">
+                                <span class="eq-name">Life Interval Lived (L<sub>x</sub>)</span>
+                                <span class="eq-formula">L<sub>x</sub> = 5 × (n<sub>x</sub> + n<sub>x+1</sub>) / 2</span>
+                            </div>
+                            <div class="eq-item">
+                                <span class="eq-name">Life Expectancy (e<sub>x</sub>)</span>
+                                <span class="eq-formula">e<sub>x</sub> = T<sub>x</sub> / n<sub>x</sub></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 5: PHOTO DOCUMENTATION -->
+            <section class="slide-section" id="slide4">
+                <div class="slide-inner">
+                    <div class="slide-badge"><i class="fa-solid fa-camera-retro"></i> Field Work</div>
+                    <h2 class="section-title">Fieldwork Photo Documentation</h2>
+                    <p class="section-desc">Photographic evidence capturing key steps of data logging, raw citation gathering, and tools deployed in the field.</p>
+                    
+                    <div class="photo-gallery">
+                        <div class="gallery-card">
+                            <div class="gallery-image-box">
+                                <img src="assets/gravestone_closeup.png" alt="Headstone Demographics Collection" class="gallery-img" id="galleryPhoto1">
+                                <label class="photo-upload-overlay">
+                                    <i class="fa-solid fa-camera"></i> Replace Photo
+                                    <input type="file" class="gallery-upload-input" data-gallery-id="galleryPhoto1" accept="image/*" style="display:none;">
+                                </label>
+                            </div>
+                            <div class="gallery-info">
+                                <h4 contenteditable="true" id="galleryTitle1">Headstone Demographics Data Collection</h4>
+                                <p contenteditable="true" id="galleryDesc1">Close-up of a well-preserved 19th-century headstone. Birth and death dates were verified through multiple gravestone angles and cross-referenced with online municipal registries to eliminate recording errors.</p>
+                            </div>
+                        </div>
+
+                        <div class="gallery-card">
+                            <div class="gallery-image-box">
+                                <img src="assets/field_research.png" alt="Ecology Study Field Tools" class="gallery-img" id="galleryPhoto2">
+                                <label class="photo-upload-overlay">
+                                    <i class="fa-solid fa-camera"></i> Replace Photo
+                                    <input type="file" class="gallery-upload-input" data-gallery-id="galleryPhoto2" accept="image/*" style="display:none;">
+                                </label>
+                            </div>
+                            <div class="gallery-info">
+                                <h4 contenteditable="true" id="galleryTitle2">Biology Field Research Setup</h4>
+                                <p contenteditable="true" id="galleryDesc2">Tools deployed during field sampling, including waterproof clipboard tables, biological data worksheets, academic field reference manuals, and municipal research permit documentations.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 6: RAW DATA TABLE — MALE -->
+            <section class="slide-section" id="slide5">
+                <div class="slide-inner large-layout">
+                    <div class="section-title-bar">
+                        <div>
+                            <div class="slide-badge"><i class="fa-solid fa-mars"></i> Data Table</div>
+                            <h2 class="section-title">Cohort Life Table — Male Population</h2>
+                        </div>
+                    </div>
+                    
+                    <div class="table-controls-row">
+                        <div class="cemetery-selector-container">
+                            <span class="selector-label"><i class="fa-solid fa-monument"></i> Active Site:</span>
+                            <div class="cemetery-selector-buttons">
+                                <button class="cem-select-btn active" data-cemetery="cemeteryA">Evergreen Memorial</button>
+                                <button class="cem-select-btn" data-cemetery="cemeteryB">Oakridge Cemetery</button>
+                            </div>
+                        </div>
+                        <div class="table-actions">
+                            <label class="btn btn-secondary btn-sm upload-btn">
+                                <i class="fa-solid fa-file-excel"></i> Import XLSX
+                                <input type="file" class="xlsx-upload-input" accept=".xlsx, .xls" style="display:none;">
+                            </label>
+                            <button class="btn btn-primary btn-sm reset-data-btn" data-gender="male"><i class="fa-solid fa-rotate-left"></i> Reset Defaults</button>
+                            <button class="btn btn-secondary btn-sm clear-data-btn" data-gender="male"><i class="fa-solid fa-eraser"></i> Clear Table</button>
+                        </div>
+                    </div>
+                    
+                    <p class="section-desc"><strong>Interactive Interface:</strong> Edit the <strong>Deaths (d<sub>x</sub>)</strong> column or upload your XLSX spreadsheet. The table will automatically run dynamic updates on all subsequent demographic columns in real-time. Ensure your total deaths sum to exactly <strong>200</strong>.</p>
+                    
+                    <div class="table-container">
+                        <table class="data-table" id="maleTable">
+                            <thead>
+                                <tr>
+                                    <th title="Age Interval of the cohort">Age Interval (x)</th>
+                                    <th title="Number of deaths in the interval (Editable)" class="editable-header">Deaths (d<sub>x</sub>) <i class="fa-solid fa-pen"></i></th>
+                                    <th title="Number of survivors at beginning of interval">Survivors (n<sub>x</sub>)</th>
+                                    <th title="Survivorship rate (nx/n0)">Survivorship (l<sub>x</sub>)</th>
+                                    <th title="Mortality rate within interval (dx/nx)">Mortality Rate (q<sub>x</sub>)</th>
+                                    <th title="Sum of years lived in interval">Interval Lived (L<sub>x</sub>)</th>
+                                    <th title="Cumulative years remaining to be lived">Total Remaining (T<sub>x</sub>)</th>
+                                    <th title="Mean expectation of life (years) (Tx/nx)">Life Expectancy (e<sub>x</sub>)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Generated Dynamically by JS -->
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td>Total Cohort</td>
+                                    <td class="total-deaths-cell"><span id="maleTotalDeaths">200</span> / 200</td>
+                                    <td colspan="6" class="validation-msg-cell"><span id="maleValidationMsg" class="valid-status"><i class="fa-solid fa-circle-check"></i> Valid Cohort Size</span></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 7: RAW DATA TABLE — FEMALE -->
+            <section class="slide-section" id="slide6">
+                <div class="slide-inner large-layout">
+                    <div class="section-title-bar">
+                        <div>
+                            <div class="slide-badge"><i class="fa-solid fa-venus"></i> Data Table</div>
+                            <h2 class="section-title">Cohort Life Table — Female Population</h2>
+                        </div>
+                    </div>
+                    
+                    <div class="table-controls-row">
+                        <div class="cemetery-selector-container">
+                            <span class="selector-label"><i class="fa-solid fa-monument"></i> Active Site:</span>
+                            <div class="cemetery-selector-buttons">
+                                <button class="cem-select-btn active" data-cemetery="cemeteryA">Evergreen Memorial</button>
+                                <button class="cem-select-btn" data-cemetery="cemeteryB">Oakridge Cemetery</button>
+                            </div>
+                        </div>
+                        <div class="table-actions">
+                            <label class="btn btn-secondary btn-sm upload-btn">
+                                <i class="fa-solid fa-file-excel"></i> Import XLSX
+                                <input type="file" class="xlsx-upload-input" accept=".xlsx, .xls" style="display:none;">
+                            </label>
+                            <button class="btn btn-primary btn-sm reset-data-btn" data-gender="female"><i class="fa-solid fa-rotate-left"></i> Reset Defaults</button>
+                            <button class="btn btn-secondary btn-sm clear-data-btn" data-gender="female"><i class="fa-solid fa-eraser"></i> Clear Table</button>
+                        </div>
+                    </div>
+                    
+                    <p class="section-desc"><strong>Interactive Interface:</strong> Edit the <strong>Deaths (d<sub>x</sub>)</strong> column or upload your XLSX spreadsheet. The table will automatically run dynamic updates on all subsequent demographic columns in real-time. Ensure your total deaths sum to exactly <strong>200</strong>.</p>
+                    
+                    <div class="table-container">
+                        <table class="data-table" id="femaleTable">
+                            <thead>
+                                <tr>
+                                    <th title="Age Interval of the cohort">Age Interval (x)</th>
+                                    <th title="Number of deaths in the interval (Editable)" class="editable-header">Deaths (d<sub>x</sub>) <i class="fa-solid fa-pen"></i></th>
+                                    <th title="Number of survivors at beginning of interval">Survivors (n<sub>x</sub>)</th>
+                                    <th title="Survivorship rate (nx/n0)">Survivorship (l<sub>x</sub>)</th>
+                                    <th title="Mortality rate within interval (dx/nx)">Mortality Rate (q<sub>x</sub>)</th>
+                                    <th title="Sum of years lived in interval">Interval Lived (L<sub>x</sub>)</th>
+                                    <th title="Cumulative years remaining to be lived">Total Remaining (T<sub>x</sub>)</th>
+                                    <th title="Mean expectation of life (years) (Tx/nx)">Life Expectancy (e<sub>x</sub>)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Generated Dynamically by JS -->
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td>Total Cohort</td>
+                                    <td class="total-deaths-cell"><span id="femaleTotalDeaths">200</span> / 200</td>
+                                    <td colspan="6" class="validation-msg-cell"><span id="femaleValidationMsg" class="valid-status"><i class="fa-solid fa-circle-check"></i> Valid Cohort Size</span></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 8: SURVIVORSHIP CURVE -->
+            <section class="slide-section" id="slide7">
+                <div class="slide-inner">
+                    <div class="slide-badge"><i class="fa-solid fa-chart-line"></i> Survivorship Curve</div>
+                    <h2 class="section-title">lx vs. Age Interval — Comparative Curve</h2>
+                    
+                    <div class="chart-controls-row">
+                        <div class="chart-mode-selector">
+                            <span class="selector-label"><i class="fa-solid fa-eye"></i> Visualise Data:</span>
+                            <div class="chart-mode-buttons">
+                                <button class="chart-mode-btn active" data-mode="cemeteryA">Evergreen Memorial</button>
+                                <button class="chart-mode-btn" data-mode="cemeteryB">Oakridge Cemetery</button>
+                                <button class="chart-mode-btn" data-mode="compare">Compare Both Sites</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <p class="section-desc">The survivorship curve plots lx (survivors per 1,000) against age interval. Use the toggle above to view independent cemetery curves, or plot all cohorts on a shared axis for direct comparative analysis.</p>
+                    
+                    <div class="chart-flex-container">
+                        <div class="chart-area-container">
+                            <div class="custom-chart-legend" id="customChartLegend">
+                                <!-- Generated Dynamically in JS based on Selector Mode -->
+                            </div>
+                            <div class="chart-wrapper">
+                                <canvas id="survivorshipChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-legend-card">
+                            <h3><i class="fa-solid fa-chart-bar"></i> Dynamic Curve Diagnostics</h3>
+                            <div class="diagnostic-metric">
+                                <div class="metric-item">
+                                    <span class="metric-label">Male Median Lifespan</span>
+                                    <span class="metric-val" id="maleMedianVal">67.5 years</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">Female Median Lifespan</span>
+                                    <span class="metric-val" id="femaleMedianVal">74.2 years</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">Theoretical Curve Model</span>
+                                    <span class="metric-val highlight-green">Type I (Highly Convex)</span>
+                                </div>
+                            </div>
+                            <div class="chart-note">
+                                <p><strong>Interpretation:</strong> A steep drop at older ages indicates low infant mortality and high adult survival, typical of modern and industrialized human populations. Females exhibit a consistent right-shift relative to males, reflecting statistically higher survivorship across mid-life intervals.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 9: ANALYSIS & DISCUSSION -->
+            <section class="slide-section" id="slide8">
+                <div class="slide-inner large-layout">
+                    <h2 class="section-title"><i class="fa-solid fa-comments"></i> Demographic Analysis & Discussion</h2>
+                        <div class="qa-container">
+                        <!-- Q1 -->
+                        <div class="qa-card">
+                            <div class="qa-badge">GUIDE QUESTION 1</div>
+                            <h3 contenteditable="true" id="qa1Question">What can you say about the populations analyzed? What are the observable trends among age groups?</h3>
+                            <div class="qa-answer" contenteditable="true" id="qa1Answer">
+                                <p>The datasets for both male and female populations show a demographic pattern highly characteristic of modernizing or modern human cohorts. The core observable trends are:</p>
+                                <ul>
+                                    <li><strong>Extremely Low Juvenile Mortality:</strong> Survivorship (l<sub>x</sub>) remains above 90% through childhood and early adulthood (intervals 0-4 to 25-29). This indicates effective parental care, baseline sanitation, and protection from early environmental hazards.</li>
+                                    <li><strong>Prolonged Adult Stability:</strong> A long plateau of low mortality is visible between the ages of 15 and 55. The slope of the curve is extremely flat in this range, indicating that the probability of survival during prime reproductive and working years is high.</li>
+                                    <li><strong>Late-Onset Senescence:</strong> A clear, rapid escalation of deaths occurs after age 60, with the slope of both curves steepening dramatically. Over 75% of the total cohort deaths occur between ages 60 and 85, displaying physiological senescence.</li>
+                                    <li><strong>Female Longevity Bias:</strong> Female cohorts consistently display higher survivorship at every age interval compared to males. The female median lifespan is roughly 6.7 years longer, representing a universal physiological and behavioral pattern seen in demography.</li>
+                                </ul>
+                            </div>
+                        </div>
+ 
+                        <!-- Q2 -->
+                        <div class="qa-card">
+                            <div class="qa-badge">GUIDE QUESTION 2</div>
+                            <h3 contenteditable="true" id="qa2Question">What type of survivorship curve is exhibited? Why does this cohort exhibit this curve?</h3>
+                            <div class="qa-answer" contenteditable="true" id="qa2Answer">
+                                <p>Both populations exhibit a classic, robust <strong>Type I Survivorship Curve</strong> (highly convex). A Type I curve is defined by high survivorship throughout early and middle life, followed by a rapid, concentrated decline in survival during old age.</p>
+                                <p>This pattern is exhibited because humans are highly <strong>K-selected species</strong> characterized by:</p>
+                                <ul>
+                                    <li><strong>High Parental Investment:</strong> Few offspring are produced, but massive physiological, social, and economic resources are dedicated to their nurture and protection.</li>
+                                    <li><strong>Advanced Social Infrastructure:</strong> Communities provide safe shelter, clean drinking water, regulated sanitation, and reliable food supplies, which buffer individuals from natural selection factors (e.g. predators, famines).</li>
+                                    <li><strong>Modern Medicine & Public Health:</strong> Vaccines, antibiotics, clinical interventions, and emergency services prevent pathogens and physical traumas from causing widespread youth mortality, pushing deaths into the late physiological limit.</li>
+                                </ul>
+                            </div>
+                        </div>
+ 
+                        <!-- Q3 -->
+                        <div class="qa-card">
+                            <div class="qa-badge">GUIDE QUESTION 3</div>
+                            <h3 contenteditable="true" id="qa3Question">If you were to compare two cemeteries, such as a historic one (pre-1900) and a modern active one, what differences would you expect in their survivorship curves and why?</h3>
+                            <div class="qa-answer" contenteditable="true" id="qa3Answer">
+                                <p>If comparing a historical cohort (interred pre-1900) to a modern cohort (interred post-1950), we would observe dramatic shifts in the curvature and metrics:</p>
+                                <div class="comparison-grid">
+                                    <div class="comp-box historic">
+                                        <h4 contenteditable="true" id="qa3HistoricHeader"><i class="fa-solid fa-clock-rotate-left"></i> Pre-1900 Historic Cemetery</h4>
+                                        <ul contenteditable="true" id="qa3HistoricBody">
+                                            <li><strong>Shape:</strong> Approaches a Type II (linear) or Type III (highly concave) in early intervals before leveling out.</li>
+                                            <li><strong>Infant Mortality:</strong> Massive spike (20-30% deaths in the 0-4 age group) due to a lack of antibiotics, sanitation, sterile birthing, and vaccinations.</li>
+                                            <li><strong>Median Lifespan:</strong> Considerably lower (often 35-45 years).</li>
+                                            <li><strong>Causes:</strong> High infectious disease rates (tuberculosis, cholera, smallpox) and high maternal mortality.</li>
+                                        </ul>
+                                    </div>
+                                    <div class="comp-box modern">
+                                        <h4 contenteditable="true" id="qa3ModernHeader"><i class="fa-solid fa-calendar-check"></i> Post-1950 Modern Cemetery</h4>
+                                        <ul contenteditable="true" id="qa3ModernBody">
+                                            <li><strong>Shape:</strong> A perfect, high-plateau Type I curve with a rectangularized profile.</li>
+                                            <li><strong>Infant Mortality:</strong> Negligible (well under 1%), forming a nearly flat line at 1.0 survivorship up to age 50.</li>
+                                            <li><strong>Median Lifespan:</strong> Elevated to 75-82 years.</li>
+                                            <li><strong>Causes:</strong> Advanced public health systems, massive medical infrastructure, robust pediatric care, and treatments for chronic age-related conditions.</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 10: CONCLUSION -->
+            <section class="slide-section" id="slide9">
+                <div class="slide-inner conclusion-slide-layout">
+                    <div class="conclusion-icon-box">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                    </div>
+                    <h2 class="conclusion-title">Demographic Investigation Summary</h2>
+                    <p class="conclusion-subtitle">Key Takeaways from our Survivorship Analysis</p>
+                        <div class="takeaways-grid">
+                        <div class="takeaway-card">
+                            <div class="tk-icon"><i class="fa-solid fa-arrows-spin"></i></div>
+                            <h4 contenteditable="true" id="tk1Title">Ecological Theory Confirmed</h4>
+                            <p contenteditable="true" id="tk1Desc">Human cohorts demonstrate a strong, unequivocal Type I survivorship pattern, indicating high adaptation to ecological niches and substantial parental buffering of infant life.</p>
+                        </div>
+                        <div class="takeaway-card">
+                            <div class="tk-icon"><i class="fa-solid fa-scale-balanced"></i></div>
+                            <h4 contenteditable="true" id="tk2Title">Sex-Based Longevity Gap</h4>
+                            <p contenteditable="true" id="tk2Desc">Female cohorts display higher survivorship and longer life expectancy at almost all age intervals, pointing to combined genetic, biological, and behavioral advantages.</p>
+                        </div>
+                        <div class="takeaway-card">
+                            <div class="tk-icon"><i class="fa-solid fa-laptop-code"></i></div>
+                            <h4 contenteditable="true" id="tk3Title">CS & Biology Synergy</h4>
+                            <p contenteditable="true" id="tk3Desc">Demographic research is highly enhanced by computer science models. Constructing interactive life tables and charts provides dynamic, real-time insights into environmental health variables.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+ 
+            <!-- SLIDE 11: REFERENCES / PROOF OF VISIT -->
+            <section class="slide-section" id="slide10">
+                <div class="slide-inner">
+                    <h2 class="section-title" contenteditable="true" id="refTitle"><i class="fa-solid fa-file-shield"></i> References & Proof of Field Visit</h2>
+                    <p class="section-desc" contenteditable="true" id="refDesc">Official documentation, permits, and academic research credits supporting this demographic survey.</p>
+                    
+                    <div class="proof-layout-grid">
+                        <div class="proof-card permit-details">
+                            <h3 contenteditable="true" id="permitHeader"><i class="fa-solid fa-passport"></i> Field Visit Authorization</h3>
+                            <div class="permit-stamps-flex">
+                                <div class="permit-stamp-box">
+                                    <div class="stamp-header">MUNICIPAL DEPT. OF CEMETERIES</div>
+                                    <div class="stamp-body">
+                                        <span class="stamp-title">PERMIT A: EVERGREEN</span>
+                                        <span class="stamp-code">#ECOL-2026-09A</span>
+                                        <span class="stamp-date">APPROVED: MAY 12, 2026</span>
+                                    </div>
+                                </div>
+                                <div class="permit-stamp-box site-b-stamp">
+                                    <div class="stamp-header">MUNICIPAL DEPT. OF CEMETERIES</div>
+                                    <div class="stamp-body">
+                                        <span class="stamp-title">PERMIT B: OAKRIDGE</span>
+                                        <span class="stamp-code">#ECOL-2026-10B</span>
+                                        <span class="stamp-date">APPROVED: MAY 13, 2026</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <ul class="permit-meta" contenteditable="true" id="permitMetaList">
+                                <li><strong>Research Institution:</strong> BioCity Technical College</li>
+                                <li><strong>Lead Investigator:</strong> Ali Andrei (Dept. of Computer Science)</li>
+                                <li><strong>Authorized Sites:</strong> Evergreen Memorial Park & Oakridge Cemetery</li>
+                                <li><strong>Scope:</strong> Visual data collection from headstones; strict non-invasive municipal checks.</li>
+                            </ul>
+                        </div>
+ 
+                        <div class="proof-card academic-refs">
+                            <h3 contenteditable="true" id="academicRefsHeader"><i class="fa-solid fa-book-bookmark"></i> Academic References</h3>
+                            <ol class="references-list">
+                                <li contenteditable="true" id="refItem1">
+                                    <span class="ref-citation">Begon, M., Townsend, C. R., & Harper, J. L. (2006). <em>Ecology: From Individuals to Ecosystems</em> (4th ed.). Blackwell Publishing.</span>
+                                    <span class="ref-note">Used for structural definitions of demographic matrices and K-selection theory.</span>
+                                </li>
+                                <li contenteditable="true" id="refItem2">
+                                    <span class="ref-citation">Deevey, E. S. (1947). Life tables for natural populations of animals. <em>The Quarterly Review of Biology</em>, 22(4), 283–314.</span>
+                                    <span class="ref-note">Baseline text establishing the Type I, II, and III survivorship classifications.</span>
+                                </li>
+                                <li contenteditable="true" id="refItem3">
+                                    <span class="ref-citation">Keyfitz, N., & Caswell, H. (2005). <em>Applied Mathematical Demography</em>. Springer Science & Business Media.</span>
+                                    <span class="ref-note">Mathematical algorithms for calculating age-specific life expectancy (e<sub>x</sub>) from interval widths.</span>
+                                </li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Slide Mode Controls Bar (Floating bottom control panel) -->
+    <footer class="slide-controls" id="slideControls">
+        <div class="control-left">
+            <button id="btnPrev" class="nav-control-btn" title="Previous Slide (ArrowLeft)"><i class="fa-solid fa-chevron-left"></i> Prev</button>
+        </div>
+        <div class="control-center">
+            <div class="slide-indicator-dots" id="indicatorDots">
+                <!-- Filled by JS with active classes -->
+            </div>
+        </div>
+        <div class="control-right">
+            <button id="btnNext" class="nav-control-btn" title="Next Slide (ArrowRight / Space)">Next <i class="fa-solid fa-chevron-right"></i></button>
+        </div>
+    </footer>
+
+    <!-- Interactive Lightbox for Proof Gallery or Enlarged Views -->
+    <div class="lightbox" id="lightbox">
+        <span class="lightbox-close" id="lightboxClose">&times;</span>
+        <img class="lightbox-content" id="lightboxImg">
+        <div class="lightbox-caption" id="lightboxCaption"></div>
+    </div>
+
+    <!-- Custom JS -->
+    <script src="app.js"></script>
+</body>
+</html>
