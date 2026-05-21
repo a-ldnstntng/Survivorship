@@ -129,7 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
         progressBar.style.width = `${percent}%`;
         
         // Trigger charts resize when opening chart slide
-        if (currentSlide === 7 && survivorshipChart) {
+        if (currentSlide === 2 && survivorshipChart) {
             setTimeout(() => {
                 survivorshipChart.resize();
                 updateChartData(); // Ensure correct lines and sizes are shown
