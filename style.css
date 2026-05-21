@@ -1755,6 +1755,12 @@ body.doc-mode {
     height: auto;
 }
 
+body.doc-mode .app-container {
+    display: block;
+    overflow: visible;
+    height: auto;
+}
+
 body.doc-mode .sidebar {
     display: none;
 }
