@@ -39,8 +39,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const defaultMaleDeathsA = [3, 1, 1, 2, 4, 5, 6, 7, 8, 11, 13, 16, 22, 26, 28, 23, 14, 7, 2, 1, 0];
     const defaultFemaleDeathsA = [2, 1, 1, 1, 2, 3, 4, 5, 6, 8, 10, 12, 18, 24, 29, 31, 25, 13, 4, 1, 0];
     
-    const defaultMaleDeathsB = [12, 8, 5, 4, 6, 8, 10, 11, 12, 14, 15, 17, 19, 18, 16, 11, 8, 4, 2, 0, 0];
-    const defaultFemaleDeathsB = [10, 6, 4, 3, 5, 7, 8, 9, 11, 13, 14, 16, 18, 20, 20, 15, 11, 6, 3, 1, 0];
+    const defaultMaleDeathsB = [3, 1, 0, 4, 2, 5, 2, 6, 7, 6, 10, 19, 21, 52, 47, 6, 6, 1, 2, 0, 0];
+    const defaultFemaleDeathsB = [3, 1, 2, 1, 0, 3, 2, 2, 1, 4, 5, 18, 25, 53, 65, 10, 4, 1, 0, 0, 0];
 
     // --- State Object ---
     let activeCemetery = 'cemeteryA';
@@ -49,19 +49,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const cemeteries = {
         cemeteryA: {
-            name: "Evergreen Memorial Park",
-            location: "North Ridge Heights, BioCity (40.7891° N, 73.9626° W)",
+            name: "St. John Memorial Park",
+            location: "Col. Bonny Serrano Ave, San Juan City, 1504 Metro Manila)",
             date: "May 15, 2026",
-            desc: "Established in 1864, Evergreen Memorial Park features over 15,000 interments across 45 rolling acres of woodland. The site serves as a vital historical archive of human demography, enabling an accurate longitudinal review of cohort survivorship over time.",
+            desc: "St. John Memorial Park is a modern cemetery serving families in San Juan City and nearby areas of Metro Manila. Established during the city's late-20th-century urban expansion, it departs from Spanish-colonial churchyard designs by featuring landscaped grounds, wider pathways, and modern burial facilities. Today, it stands as a serene, well-organized space for the growing population to practice the Filipino tradition of honoring loved ones, particularly during Undas.",
             photo: "assets/cemetery_entrance.png",
             maleDeaths: [...defaultMaleDeathsA],
             femaleDeaths: [...defaultFemaleDeathsA]
         },
         cemeteryB: {
-            name: "Oakridge Cemetery",
-            location: "East Valley District, BioCity (40.7421° N, 73.8912° W)",
+            name: "City of San Jose Del Monte Public Cemetery",
+            location: "R3W9+HFJ, SJDM, Bulacan)",
             date: "May 16, 2026",
-            desc: "Founded in 1888, Oakridge Cemetery is a historic municipal graveyard spanning 30 acres. It contains a higher concentration of early-20th-century industrial worker cohorts, providing a distinct comparative dataset reflecting urban industrialization and its specific demographic impacts.",
+            desc: "The City of San Jose del Monte (CSJDM) Public Cemetery (often called San Jose Cemetery Park) has a history deeply intertwined with the development of the city itself. Because it evolved from a traditional municipal burial ground into a modern city-managed park, there isn't a single definitive, widely published \"founding year\" for the original site.",
             photo: "assets/cemetery_entrance_2.png",
             maleDeaths: [...defaultMaleDeathsB],
             femaleDeaths: [...defaultFemaleDeathsB]
