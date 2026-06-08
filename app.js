@@ -34,8 +34,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const cohortSize = 200; // Fixed n_0 size
     
     // --- Default Cohort Frequencies ---
-    const defaultMaleDeathsA = [1, 2, 1, 1, 2, 4, 5, 6, 7, 8, 11, 13, 16, 22, 26, 28, 23, 14, 7, 2, 1, 0];
-    const defaultFemaleDeathsA = [1, 1, 1, 1, 1, 2, 3, 4, 5, 6, 8, 10, 12, 18, 24, 29, 31, 25, 13, 4, 1, 0];
+    const defaultMaleDeathsA = [3, 5, 0, 1, 0, 3, 2, 1, 2, 8, 8, 12, 13, 21, 29, 18, 16, 10, 5, 1, 2, 1];
+    const defaultFemaleDeathsA = [1, 3, 0, 3, 1, 2, 2, 6, 3, 6, 3, 8, 15, 11, 14, 16, 18, 11, 5, 6, 2, 2];
     
     const defaultMaleDeathsB = [1, 2, 1, 1, 3, 3, 4, 2, 8, 6, 7, 9, 21, 23, 54, 42, 4, 6, 3, 0, 0, 0];
     const defaultFemaleDeathsB = [2, 1, 1, 2, 1, 0, 3, 2, 3, 1, 4, 4, 21, 25, 61, 56, 9, 3, 1, 0, 0, 0];
@@ -53,7 +53,8 @@ document.addEventListener('DOMContentLoaded', () => {
             desc: "St. John Memorial Park is a modern cemetery serving families in San Juan City and nearby areas of Metro Manila. Established during the city's late-20th-century urban expansion, it departs from Spanish-colonial churchyard designs by featuring landscaped grounds, wider pathways, and modern burial facilities. Today, it stands as a serene, well-organized space for the growing population to practice the Filipino tradition of honoring loved ones, particularly during Undas.",
             photo: "assets/cemetery_entrance.png",
             maleDeaths: [...defaultMaleDeathsA],
-            femaleDeaths: [...defaultFemaleDeathsA]
+            femaleDeaths: [...defaultFemaleDeathsA],
+            expectedCohortSize: { male: 161, female: 138 }
         },
         cemeteryB: {
             name: "City of San Jose Del Monte Public Cemetery",
@@ -62,7 +63,8 @@ document.addEventListener('DOMContentLoaded', () => {
             desc: "The City of San Jose del Monte (CSJDM) Public Cemetery (often called San Jose Cemetery Park) has a history deeply intertwined with the development of the city itself. Because it evolved from a traditional municipal burial ground into a modern city-managed park, there isn't a single definitive, widely published \"founding year\" for the original site.",
             photo: "assets/cemetery_entrance_2.png",
             maleDeaths: [...defaultMaleDeathsB],
-            femaleDeaths: [...defaultFemaleDeathsB]
+            femaleDeaths: [...defaultFemaleDeathsB],
+            expectedCohortSize: { male: 200, female: 200 }
         }
     };
 
@@ -240,14 +242,15 @@ document.addEventListener('DOMContentLoaded', () => {
     
     function calculateLifeTable(deaths) {
         const tableRows = [];
-        let survivors = cohortSize; // n_0 = 200
+        const currentCohortSize = deaths.reduce((sum, d) => sum + d, 0) || 200;
+        let survivors = currentCohortSize;
         
         // First Pass: Calculate nx, lx, qx, Lx
         for (let i = 0; i < ageIntervals.length; i++) {
             const age = ageIntervals[i];
             const dx = Math.min(survivors, deaths[i] || 0); // deaths can't exceed remaining survivors
             const nx = survivors;
-            const lx = nx / cohortSize;
+            const lx = nx / currentCohortSize;
             const qx = nx > 0 ? dx / nx : 0;
             
             // Next survivors
@@ -315,6 +318,8 @@ document.addEventListener('DOMContentLoaded', () => {
         tableBody.innerHTML = '';
         let sumDeaths = 0;
         
+        const expectedSize = (cemeteries[activeCemetery].expectedCohortSize && cemeteries[activeCemetery].expectedCohortSize[gender]) || 200;
+        
         dataRows.forEach((row, i) => {
             sumDeaths += row.dx;
             
@@ -328,7 +333,7 @@ document.addEventListener('DOMContentLoaded', () => {
                            data-index="${i}" 
                            value="${row.dx}" 
                            min="0" 
-                           max="200"
+                           max="${expectedSize}"
                            step="1">
                 </td>
                 <td class="nx-col">${row.nx}</td>
@@ -346,14 +351,20 @@ document.addEventListener('DOMContentLoaded', () => {
             totalDeathsSpan.textContent = sumDeaths;
         }
         
-        // Validate if cohort sums to exactly 200
+        // Update expected size display in table footer
+        const expectedSizeSpan = document.getElementById(`${gender}ExpectedSize`);
+        if (expectedSizeSpan) {
+            expectedSizeSpan.textContent = expectedSize;
+        }
+        
+        // Validate if cohort sums to exactly expectedSize
         if (validationMsg) {
-            if (sumDeaths === cohortSize) {
+            if (sumDeaths === expectedSize) {
                 validationMsg.className = 'valid-status';
-                validationMsg.innerHTML = '<i class="fa-solid fa-circle-check"></i> Valid Cohort Size (200)';
+                validationMsg.innerHTML = `<i class="fa-solid fa-circle-check"></i> Valid Cohort Size (${expectedSize})`;
             } else {
                 validationMsg.className = 'invalid-status';
-                validationMsg.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Error: Deaths must sum to 200 (Current: ${sumDeaths})`;
+                validationMsg.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Error: Deaths must sum to ${expectedSize} (Current: ${sumDeaths})`;
             }
         }
         
@@ -376,7 +387,8 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Numeric sanitization
         if (isNaN(val) || val < 0) val = 0;
-        if (val > cohortSize) val = cohortSize;
+        const expectedSize = (cemeteries[activeCemetery].expectedCohortSize && cemeteries[activeCemetery].expectedCohortSize[gender]) || 200;
+        if (val > expectedSize) val = expectedSize;
         input.value = val;
         
         if (gender === 'male') {
@@ -416,8 +428,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (gender === 'male') {
                 cemeteries[activeCemetery].maleDeaths = [...defMale];
+                if (!cemeteries[activeCemetery].expectedCohortSize) {
+                    cemeteries[activeCemetery].expectedCohortSize = {};
+                }
+                cemeteries[activeCemetery].expectedCohortSize.male = defMale.reduce((a, b) => a + b, 0);
             } else {
                 cemeteries[activeCemetery].femaleDeaths = [...defFemale];
+                if (!cemeteries[activeCemetery].expectedCohortSize) {
+                    cemeteries[activeCemetery].expectedCohortSize = {};
+                }
+                cemeteries[activeCemetery].expectedCohortSize.female = defFemale.reduce((a, b) => a + b, 0);
             }
             recalculateAndRefresh();
         });
@@ -426,9 +446,10 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.clear-data-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             const gender = btn.dataset.gender;
-            // Clear to all 0s, except index 14 (70-74) which holds 200 to keep it valid
+            // Clear to all 0s, except index 14 (70-74) which holds expected size to keep it valid
+            const expectedSize = (cemeteries[activeCemetery].expectedCohortSize && cemeteries[activeCemetery].expectedCohortSize[gender]) || 200;
             const cleared = Array(ageIntervals.length).fill(0);
-            cleared[14] = 200; // default spike so it remains a valid cohort size
+            cleared[14] = expectedSize; // default spike so it remains a valid cohort size
             
             if (gender === 'male') {
                 cemeteries[activeCemetery].maleDeaths = cleared;
@@ -1097,28 +1118,36 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 let importedAny = false;
                 if (parsedMaleDeaths && parsedMaleDeaths.some(d => d > 0)) {
-                    cemeteries[activeCemetery].maleDeaths = standardizeCohort(parsedMaleDeaths);
+                    cemeteries[activeCemetery].maleDeaths = parsedMaleDeaths;
+                    if (!cemeteries[activeCemetery].expectedCohortSize) {
+                        cemeteries[activeCemetery].expectedCohortSize = {};
+                    }
+                    cemeteries[activeCemetery].expectedCohortSize.male = parsedMaleDeaths.reduce((a, b) => a + b, 0);
                     importedAny = true;
                 }
                 if (parsedFemaleDeaths && parsedFemaleDeaths.some(d => d > 0)) {
-                    cemeteries[activeCemetery].femaleDeaths = standardizeCohort(parsedFemaleDeaths);
+                    cemeteries[activeCemetery].femaleDeaths = parsedFemaleDeaths;
+                    if (!cemeteries[activeCemetery].expectedCohortSize) {
+                        cemeteries[activeCemetery].expectedCohortSize = {};
+                    }
+                    cemeteries[activeCemetery].expectedCohortSize.female = parsedFemaleDeaths.reduce((a, b) => a + b, 0);
                     importedAny = true;
                 }
                 
                 if (importedAny) {
                     recalculateAndRefresh();
                     
-                    const hasMale = parsedMaleDeaths && parsedMaleDeaths.some(d => d > 0);
-                    const hasFemale = parsedFemaleDeaths && parsedFemaleDeaths.some(d => d > 0);
+                    const sumMale = parsedMaleDeaths ? parsedMaleDeaths.reduce((a, b) => a + b, 0) : 0;
+                    const sumFemale = parsedFemaleDeaths ? parsedFemaleDeaths.reduce((a, b) => a + b, 0) : 0;
                     
-                    if (hasMale && hasFemale) {
-                        alert("Data has been loaded: 200 males and 200 females (total cohort of 400).");
-                    } else if (hasMale) {
-                        alert("Data has been loaded: 200 males (total cohort of 200).");
-                    } else if (hasFemale) {
-                        alert("Data has been loaded: 200 females (total cohort of 200).");
+                    if (sumMale > 0 && sumFemale > 0) {
+                        alert(`Data has been loaded: ${sumMale} males and ${sumFemale} females.`);
+                    } else if (sumMale > 0) {
+                        alert(`Data has been loaded: ${sumMale} males.`);
+                    } else if (sumFemale > 0) {
+                        alert(`Data has been loaded: ${sumFemale} females.`);
                     } else {
-                        alert("Data has been loaded: cohort size standardized to 200.");
+                        alert("Data has been loaded.");
                     }
                 } else {
                     alert("Could not detect valid demographic data in the uploaded Excel file.\nPlease verify it contains either:\n1. A 'Data Entry' tab with Gender and Age (or Born & Died years) columns.\n2. Binned columns for Male/Female deaths (dx) in a sheet.");
@@ -1450,11 +1479,15 @@ document.addEventListener('DOMContentLoaded', () => {
             const parsed = JSON.parse(storedCem);
             const isValidA = parsed.cemeteryA && Array.isArray(parsed.cemeteryA.maleDeaths) && parsed.cemeteryA.maleDeaths.length === 22;
             const isValidB = parsed.cemeteryB && Array.isArray(parsed.cemeteryB.maleDeaths) && parsed.cemeteryB.maleDeaths.length === 22;
-            if (isValidA && isValidB) {
+            
+            // Check if St. John's maleDeaths in local storage has the old incorrect sum of 192
+            const isOldDefaultA = parsed.cemeteryA && parsed.cemeteryA.maleDeaths.reduce((a, b) => a + b, 0) === 192;
+            
+            if (isValidA && isValidB && !isOldDefaultA) {
                 if (parsed.cemeteryA) Object.assign(cemeteries.cemeteryA, parsed.cemeteryA);
                 if (parsed.cemeteryB) Object.assign(cemeteries.cemeteryB, parsed.cemeteryB);
             } else {
-                console.warn("Stored data is in old 21-bin format, clearing localStorage and using new 22-bin defaults.");
+                console.warn("Stored data is in old 21-bin format or old incorrect defaults, clearing localStorage and using new 22-bin defaults.");
                 localStorage.removeItem('survivorship_cemeteries');
             }
         } catch(e) {
