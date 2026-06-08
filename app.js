@@ -28,19 +28,17 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // --- Age Intervals (5-year groupings) ---
     const ageIntervals = [
-        "0-4", "5-9", "10-14", "15-19", "20-24", "25-29", "30-34", "35-39", 
-        "40-44", "45-49", "50-54", "55-59", "60-64", "65-69", "70-74", "75-79", 
-        "80-84", "85-89", "90-94", "95-99", "100+"
+        "0", "1-5", "6-10", "11-15", "16-20", "21-25", "26-30", "31-35", "36-40", "41-45", "46-50", "51-55", "56-60", "61-65", "66-70", "71-75", "76-80", "81-85", "86-90", "91-95", "96-100", "101+"
     ];
 
     const cohortSize = 200; // Fixed n_0 size
     
     // --- Default Cohort Frequencies ---
-    const defaultMaleDeathsA = [3, 1, 1, 2, 4, 5, 6, 7, 8, 11, 13, 16, 22, 26, 28, 23, 14, 7, 2, 1, 0];
-    const defaultFemaleDeathsA = [2, 1, 1, 1, 2, 3, 4, 5, 6, 8, 10, 12, 18, 24, 29, 31, 25, 13, 4, 1, 0];
+    const defaultMaleDeathsA = [1, 2, 1, 1, 2, 4, 5, 6, 7, 8, 11, 13, 16, 22, 26, 28, 23, 14, 7, 2, 1, 0];
+    const defaultFemaleDeathsA = [1, 1, 1, 1, 1, 2, 3, 4, 5, 6, 8, 10, 12, 18, 24, 29, 31, 25, 13, 4, 1, 0];
     
-    const defaultMaleDeathsB = [3, 1, 0, 4, 2, 5, 2, 6, 7, 6, 10, 19, 21, 52, 47, 6, 6, 1, 2, 0, 0];
-    const defaultFemaleDeathsB = [3, 1, 2, 1, 0, 3, 2, 2, 1, 4, 5, 18, 25, 53, 65, 10, 4, 1, 0, 0, 0];
+    const defaultMaleDeathsB = [1, 2, 1, 1, 3, 3, 4, 2, 8, 6, 7, 9, 21, 23, 54, 42, 4, 6, 3, 0, 0, 0];
+    const defaultFemaleDeathsB = [2, 1, 1, 2, 1, 0, 3, 2, 3, 1, 4, 4, 21, 25, 61, 56, 9, 3, 1, 0, 0, 0];
 
     // --- State Object ---
     let activeCemetery = 'cemeteryA';
@@ -255,9 +253,8 @@ document.addEventListener('DOMContentLoaded', () => {
             // Next survivors
             const nextSurvivors = Math.max(0, survivors - dx);
             
-            // L_x = Interval width (5) * average survivors in interval
-            // For 100+ (last open interval), nextSurvivors is 0, so Lx = 5 * (nx + 0) / 2 = 2.5 * nx
-            const Lx = 5 * (nx + nextSurvivors) / 2;
+            // L_x = average survivors in interval (simplified without width factor to match spreadsheet)
+            const Lx = (nx + nextSurvivors) / 2;
             
             tableRows.push({
                 age: age,
@@ -291,8 +288,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const r2 = rows[i + 1];
             
             if (r1.lx >= 0.5 && r2.lx <= 0.5) {
-                const age1 = i * 5;
-                const age2 = (i + 1) * 5;
+                const age1 = i === 0 ? 0 : 5 * i - 4;
+                const age2 = i === 0 ? 1 : 5 * i + 1;
                 
                 if (r1.lx === r2.lx) return age1;
                 // Linear interpolation formula: age = age1 + (0.5 - lx1)/(lx2 - lx1) * (age2 - age1)
@@ -302,7 +299,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         // Fallback in case of extreme custom data where cohort doesn't die off
         if (rows[rows.length - 1].lx > 0.5) return "> 100";
-        return "100+";
+        return "101+";
     }
 
     /* ==========================================================================
@@ -488,8 +485,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                     label += ': ';
                                 }
                                 if (context.parsed.y !== null) {
-                                    label += Math.round(context.parsed.y);
-                                    label += ` (${(context.parsed.y / 10).toFixed(1)}% alive)`;
+                                    label += context.parsed.y.toFixed(1) + '%';
+                                    label += ` (${Math.round(context.parsed.y * 2)} survivors)`;
                                 }
                                 return label;
                             }
@@ -525,7 +522,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     y: {
                         position: 'right',
                         min: 0,
-                        max: 1000,
+                        max: 100,
                         grid: {
                             color: gridColor,
                             drawBorder: false,
@@ -537,15 +534,14 @@ document.addEventListener('DOMContentLoaded', () => {
                                 family: "'Fira Code', monospace",
                                 size: 10
                             },
-                            stepSize: 200,
+                            stepSize: 25,
                             callback: function(value) {
-                                if (value === 1000) return '1k';
-                                return value;
+                                return value + '%';
                             }
                         },
                         title: {
                             display: true,
-                            text: 'Survivorship (lx per 1,000)',
+                            text: 'Survivorship (% Surviving)',
                             color: textColor,
                             font: {
                                 family: "'Outfit', sans-serif",
@@ -578,7 +574,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (chartMode === 'cemeteryA' || chartMode === 'compare') {
             datasets.push({
                 label: `${nameA} Male lx`,
-                data: maleRowsA.map(r => r.lx * 1000),
+                data: maleRowsA.map(r => r.lx * 100),
                 borderColor: '#d8a88a',
                 backgroundColor: 'rgba(216, 168, 138, 0.03)',
                 borderWidth: 3,
@@ -592,7 +588,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             datasets.push({
                 label: `${nameA} Female lx`,
-                data: femaleRowsA.map(r => r.lx * 1000),
+                data: femaleRowsA.map(r => r.lx * 100),
                 borderColor: '#baa293',
                 backgroundColor: 'rgba(186, 162, 147, 0.03)',
                 borderWidth: 3,
@@ -609,7 +605,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (chartMode === 'cemeteryB' || chartMode === 'compare') {
             datasets.push({
                 label: `${nameB} Male lx`,
-                data: maleRowsB.map(r => r.lx * 1000),
+                data: maleRowsB.map(r => r.lx * 100),
                 borderColor: '#cf5b43',
                 backgroundColor: 'rgba(207, 91, 67, 0.03)',
                 borderWidth: 3,
@@ -624,7 +620,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             datasets.push({
                 label: `${nameB} Female lx`,
-                data: femaleRowsB.map(r => r.lx * 1000),
+                data: femaleRowsB.map(r => r.lx * 100),
                 borderColor: '#8fab9f',
                 backgroundColor: 'rgba(143, 171, 159, 0.03)',
                 borderWidth: 3,
@@ -844,7 +840,7 @@ document.addEventListener('DOMContentLoaded', () => {
             for (let c = 0; c < row.length; c++) {
                 if (row[c] === undefined || row[c] === null) continue;
                 const val = String(row[c]).toLowerCase().replace(/\s+/g, '');
-                if (val === '0-4' || val === '0-4years' || val === '0to4' || val.includes('0-4')) {
+                if (val === '0' || val === '0-4' || val === '0-4years' || val === '0to4' || val.includes('0-4') || val === '0years') {
                     startRowIndex = r;
                     break;
                 }
@@ -861,7 +857,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (dxColIndex !== -1 && startRowIndex !== -1) {
             const deaths = [];
             for (let dataRow = startRowIndex; dataRow < rows.length; dataRow++) {
-                if (deaths.length >= 21) break;
+                if (deaths.length >= 22) break;
                 if (!rows[dataRow] || rows[dataRow][dxColIndex] === undefined || rows[dataRow][dxColIndex] === null) {
                     deaths.push(0);
                     continue;
@@ -869,7 +865,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const val = parseFloat(rows[dataRow][dxColIndex]);
                 deaths.push(isNaN(val) ? 0 : val);
             }
-            while (deaths.length < 21) {
+            while (deaths.length < 22) {
                 deaths.push(0);
             }
             
@@ -922,8 +918,8 @@ document.addEventListener('DOMContentLoaded', () => {
             headerRowIndex = 0; // Scan from row 0
         }
         
-        const maleDeaths = Array(21).fill(0);
-        const femaleDeaths = Array(21).fill(0);
+        const maleDeaths = Array(22).fill(0);
+        const femaleDeaths = Array(22).fill(0);
         
         for (let r = headerRowIndex + 1; r < rows.length; r++) {
             const row = rows[r];
@@ -950,7 +946,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             if (age >= 0) {
-                const binIndex = Math.min(20, Math.max(0, Math.floor(age / 5)));
+                let binIndex = 0;
+                if (age === 0) {
+                    binIndex = 0;
+                } else if (age >= 101) {
+                    binIndex = 21;
+                } else {
+                    binIndex = Math.floor((age - 1) / 5) + 1;
+                }
                 if (genderVal.startsWith('M') || genderVal === 'MALE') {
                     maleDeaths[binIndex]++;
                 } else if (genderVal.startsWith('F') || genderVal.startsWith('W') || genderVal === 'FEMALE' || genderVal === 'WOMAN') {
@@ -973,7 +976,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function standardizeCohort(deathsArray) {
         const sum = deathsArray.reduce((a, b) => a + b, 0);
         if (sum === 0) {
-            const fallback = Array(21).fill(0);
+            const fallback = Array(22).fill(0);
             fallback[14] = cohortSize; // default cohort spike to keep it valid
             return fallback;
         }
