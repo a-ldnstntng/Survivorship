@@ -462,7 +462,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 maintainAspectRatio: false,
                 plugins: {
                     legend: {
-                        display: false
+                        display: true,
+                        position: 'top',
+                        align: 'end',
+                        labels: {
+                            color: textColor,
+                            font: {
+                                family: "'Outfit', sans-serif",
+                                size: 11
+                            },
+                            usePointStyle: true,
+                            boxWidth: 8
+                        }
                     },
                     tooltip: {
                         backgroundColor: isDark ? '#111827' : '#ffffff',
@@ -520,7 +531,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     },
                     y: {
-                        position: 'right',
+                        position: 'left',
                         min: 0,
                         max: 100,
                         grid: {
@@ -573,64 +584,68 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (chartMode === 'cemeteryA' || chartMode === 'compare') {
             datasets.push({
-                label: `${nameA} Male lx`,
+                label: chartMode === 'compare' ? 'St. John Male % Surviving' : 'Male % Surviving',
                 data: maleRowsA.map(r => r.lx * 100),
-                borderColor: '#d8a88a',
-                backgroundColor: 'rgba(216, 168, 138, 0.03)',
-                borderWidth: 3,
-                pointBackgroundColor: '#d8a88a',
+                borderColor: '#1d5f7a',
+                backgroundColor: 'rgba(29, 95, 122, 0.03)',
+                borderWidth: 2.5,
+                pointBackgroundColor: '#1d5f7a',
                 pointBorderColor: '#ffffff',
-                pointBorderWidth: 1.5,
-                pointRadius: 4,
+                pointBorderWidth: 1,
+                pointRadius: 4.5,
                 pointHoverRadius: 6,
-                tension: 0.2,
+                pointStyle: 'circle',
+                tension: 0.25,
                 fill: true
             });
             datasets.push({
-                label: `${nameA} Female lx`,
+                label: chartMode === 'compare' ? 'St. John Female % Surviving' : 'Female % Surviving',
                 data: femaleRowsA.map(r => r.lx * 100),
-                borderColor: '#baa293',
-                backgroundColor: 'rgba(186, 162, 147, 0.03)',
-                borderWidth: 3,
-                pointBackgroundColor: '#baa293',
+                borderColor: '#853d85',
+                backgroundColor: 'rgba(133, 61, 133, 0.03)',
+                borderWidth: 2.5,
+                pointBackgroundColor: '#853d85',
                 pointBorderColor: '#ffffff',
-                pointBorderWidth: 1.5,
-                pointRadius: 4,
-                pointHoverRadius: 6,
-                tension: 0.2,
+                pointBorderWidth: 1,
+                pointRadius: 5.5,
+                pointHoverRadius: 7,
+                pointStyle: 'rectRot',
+                tension: 0.25,
                 fill: true
             });
         }
         
         if (chartMode === 'cemeteryB' || chartMode === 'compare') {
             datasets.push({
-                label: `${nameB} Male lx`,
+                label: chartMode === 'compare' ? 'CSJDM Male Survivorship (%)' : 'Male Survivorship (%)',
                 data: maleRowsB.map(r => r.lx * 100),
-                borderColor: '#cf5b43',
-                backgroundColor: 'rgba(207, 91, 67, 0.03)',
-                borderWidth: 3,
-                borderDash: [5, 5],
-                pointBackgroundColor: '#cf5b43',
+                borderColor: '#2980b9',
+                backgroundColor: 'rgba(41, 128, 185, 0.03)',
+                borderWidth: 2.5,
+                borderDash: chartMode === 'compare' ? [5, 5] : [],
+                pointBackgroundColor: '#2980b9',
                 pointBorderColor: '#ffffff',
-                pointBorderWidth: 1.5,
-                pointRadius: 4,
+                pointBorderWidth: 1,
+                pointRadius: 4.5,
                 pointHoverRadius: 6,
-                tension: 0.2,
+                pointStyle: 'circle',
+                tension: 0.25,
                 fill: true
             });
             datasets.push({
-                label: `${nameB} Female lx`,
+                label: chartMode === 'compare' ? 'CSJDM Female Survivorship (%)' : 'female survivorship (%)',
                 data: femaleRowsB.map(r => r.lx * 100),
-                borderColor: '#8fab9f',
-                backgroundColor: 'rgba(143, 171, 159, 0.03)',
-                borderWidth: 3,
-                borderDash: [5, 5],
-                pointBackgroundColor: '#8fab9f',
+                borderColor: '#d81b60',
+                backgroundColor: 'rgba(216, 27, 96, 0.03)',
+                borderWidth: 2.5,
+                borderDash: chartMode === 'compare' ? [5, 5] : [],
+                pointBackgroundColor: '#d81b60',
                 pointBorderColor: '#ffffff',
-                pointBorderWidth: 1.5,
-                pointRadius: 4,
-                pointHoverRadius: 6,
-                tension: 0.2,
+                pointBorderWidth: 1,
+                pointRadius: 5.5,
+                pointHoverRadius: 7,
+                pointStyle: 'rectRot',
+                tension: 0.25,
                 fill: true
             });
         }
@@ -1433,8 +1448,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (storedCem) {
         try {
             const parsed = JSON.parse(storedCem);
-            if (parsed.cemeteryA) Object.assign(cemeteries.cemeteryA, parsed.cemeteryA);
-            if (parsed.cemeteryB) Object.assign(cemeteries.cemeteryB, parsed.cemeteryB);
+            const isValidA = parsed.cemeteryA && Array.isArray(parsed.cemeteryA.maleDeaths) && parsed.cemeteryA.maleDeaths.length === 22;
+            const isValidB = parsed.cemeteryB && Array.isArray(parsed.cemeteryB.maleDeaths) && parsed.cemeteryB.maleDeaths.length === 22;
+            if (isValidA && isValidB) {
+                if (parsed.cemeteryA) Object.assign(cemeteries.cemeteryA, parsed.cemeteryA);
+                if (parsed.cemeteryB) Object.assign(cemeteries.cemeteryB, parsed.cemeteryB);
+            } else {
+                console.warn("Stored data is in old 21-bin format, clearing localStorage and using new 22-bin defaults.");
+                localStorage.removeItem('survivorship_cemeteries');
+            }
         } catch(e) {
             console.error("Error loading cemeteries from localStorage:", e);
         }
